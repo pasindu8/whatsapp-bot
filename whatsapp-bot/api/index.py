@@ -1,15 +1,11 @@
-# Vercel handler
-def handler(environ, start_response):
-    return app(environ, start_response)
-
 from flask import Flask, request
 import requests
 import os
 
-app = Flask(__name__)
+app = Flask(__name__) # මෙය top level එකේ, තිබෙන විදියටම තබන්න.
 
-INSTANCE_ID = "instance127525"
-TOKEN = "anay3jh9z0gtsqra45ggg"
+INSTANCE_ID = "instance127555" # මේවා ඔබේ සත්‍ය අගයන් විය යුතුය
+TOKEN = "anay3jh9z0gtsqra45ggg" # මේවා ඔබේ සත්‍ය අගයන් විය යුතුය
 
 def send_reply(to_number, message):
     url = f"https://api.ultramsg.com/{INSTANCE_ID}/messages/chat"
@@ -38,7 +34,7 @@ def webhook():
             message = data['data']['body']
             print(f"Message from {from_number}: {message}")
 
-            if "PDBOT" not in message:
+            if "PDBOT" not in message: # ඔබේ bot එකේ අරමුණ අනුව මේ condition එක වෙනස් වෙන්න පුළුවන්
                 lower_msg = message.lower()
                 if "hello" in lower_msg or "hi" in lower_msg:
                     send_reply(from_number, "Hi! How can I help you? 😊")
