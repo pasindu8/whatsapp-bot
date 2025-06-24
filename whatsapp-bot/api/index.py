@@ -1,14 +1,16 @@
+# Vercel handler
+def handler(environ, start_response):
+    return app(environ, start_response)
+
 from flask import Flask, request
 import requests
 import os
 
 app = Flask(__name__)
 
-# UltraMsg account details
 INSTANCE_ID = "instance127525"
 TOKEN = "anay3jh9z0gtsqra45ggg"
 
-# Send WhatsApp reply function
 def send_reply(to_number, message):
     url = f"https://api.ultramsg.com/{INSTANCE_ID}/messages/chat"
     payload = {"token": TOKEN, "to": to_number, "body": message}
@@ -18,12 +20,10 @@ def send_reply(to_number, message):
     except Exception as e:
         print("Error sending reply:", e)
 
-# Home route for browser check
 @app.route('/')
 def home():
     return "🚀 WhatsApp Bot is running!"
 
-# Webhook route for UltraMsg POST data
 @app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
     if request.method == 'POST':
@@ -53,7 +53,3 @@ def webhook():
             return "Bad request", 400
 
     return "Webhook is live", 200
-
-# Vercel handler
-def handler(environ, start_response):
-    return app(environ, start_response)
