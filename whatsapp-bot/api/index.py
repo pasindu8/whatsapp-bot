@@ -5,19 +5,37 @@ import os
 app = Flask(__name__)
 
 INSTANCE_ID = "instance127525"
-TOKEN = "anay3jh9z0gtsqra45ggg"
+TOKEN = "anay3jh9z0gtsqra45ggg" # ඔබේ සත්‍ය token එක
 
 def send_reply(to_number, message):
-    url = f"https://api.ultramsg.com/{INSTANCE_ID}/messages/chat"
-    payload = {"token": TOKEN, "to": to_number, "body": message}
+    # chat message API එක සඳහා මූලික URL එක
+    base_url = f"https://api.ultramsg.com/{INSTANCE_ID}/messages/chat"
+
+    # URL එකට යන parameters (query string)
+    # Ultramsg හි දෝෂ පණිවිඩය අනුව 'token' එක මෙතන තිබිය යුතුයි
+    url_params = {"token": TOKEN}
+
+    # POST request body එකට යන data
+    post_data = {"to": to_number, "body": message}
+
     try:
-        # requests.get වෙනුවට requests.post භාවිතා කරන්න, params=payload වෙනුවට data=payload
-        response = requests.post(url, data=payload) # <--- නිවැරදි කළ පේළිය
-        print("Reply sent:", response.text)
-        # ඔබට response එකේ status code එකත් පරීක්ෂා කිරීමට පුළුවන්
+        # requests.post භාවිතා කරන්න
+        # url_params 'params' ලෙස යවන්න (URL query string සඳහා)
+        # post_data 'data' ලෙස යවන්න (request body සඳහා)
+        response = requests.post(base_url, params=url_params, data=post_data)
+        
+        print("Ultramsg API Response:", response.text) # Ultramsg වෙතින් ලැබෙන සම්පූර්ණ ප්‍රතිචාරය print කරන්න
         response.raise_for_status() # 4xx හෝ 5xx වැනි වැරදි responses සඳහා HTTPError එකක් ඇති කරයි
-    except requests.exceptions.RequestException as e:
-        print(f"Error sending reply (RequestException): {e}")
+        print("Reply sent successfully to Ultramsg!")
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error occurred: {errh} - Response: {response.text}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"Something went wrong with the request: {err}")
     except Exception as e:
         print(f"An unexpected error occurred while sending reply: {e}")
 
@@ -40,23 +58,17 @@ def webhook():
             message = data['data']['body']
             print(f"Message from {from_number}: {message}")
 
-            # මේ condition එක සමාලෝචනය කරන්න: if "PDBOT" not in message:
-            # ඔබට සියලුම messages වලට reply කිරීමට අවශ්‍ය නම්, මේ 'if' block එක ඉවත් කරන්න.
-            # ඔබට 'PDBOT' message එකේ නැතිනම් පමණක් reply කිරීමට අවශ්‍ය නම්, මෙය තබා ගන්න.
-            # එසේ නොමැතිව, ඔබට 'PDBOT' message එකේ තිබේ නම් පමණක් reply කිරීමට අවශ්‍ය නම්, 'if "PDBOT" in message:' ලෙස වෙනස් කරන්න.
-            if "PDBOT" not in message:
-                lower_msg = message.lower()
-                if "hello" in lower_msg or "hi" in lower_msg:
-                    send_reply(from_number, "Hi! How can I help you? 😊")
-                elif "info" in lower_msg or "contact" in lower_msg:
-                    send_reply(from_number, "This is PDBOT 📱 Contact: 0723051652")
-                else:
-                    send_reply(from_number, "My New WhatsApp Number 0723051652 (PDBOT)")
+            # Bot logic - පරීක්ෂා කිරීම සඳහා සරල කර ඇත, අවශ්‍ය පරිදි සකස් කරන්න
+            lower_msg = message.lower()
+            if "hello" in lower_msg or "hi" in lower_msg:
+                send_reply(from_number, "Hi! How can I help you? 😊")
+            elif "info" in lower_msg or "contact" in lower_msg:
+                send_reply(from_number, "This is PDBOT 📱 Contact: 0723051652")
+            elif "lk" in lower_msg: # "lk" සඳහා විශේෂ reply එකක්
+                send_reply(from_number, "You sent 'lk'. Here's a specific response.")
             else:
-                # "PDBOT" message එකේ තිබේ නම්, කිසිවක් නොකිරීමට අවශ්‍ය නම්, මෙය ගැටලුවක් නොවේ.
-                # එසේ නොමැතිනම්, "PDBOT" තිබෙන විට කළ යුතු දේ සඳහා logic මෙතනට එකතු කරන්න.
-                print("Message contains 'PDBOT', not replying based on current logic.")
-
+                send_reply(from_number, "My New WhatsApp Number 0723051652 (PDBOT)")
+            
             return "OK", 200
 
         except KeyError as e:
@@ -66,5 +78,4 @@ def webhook():
             print(f"An unexpected error occurred in webhook processing: {e}. Data: {data}")
             return "Internal Server Error", 500
 
-    # /webhook වෙත GET requests සඳහා
     return "Webhook is live", 200
