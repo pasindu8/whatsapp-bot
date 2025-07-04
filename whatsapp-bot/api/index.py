@@ -18,11 +18,6 @@ from firebase_admin import credentials, firestore
 # Google Gemini API import
 import google.generativeai as genai
 
-# Vercel specific imports for handling HTTP requests
-# from http.server import BaseHTTPRequestHandler # <<< REMOVE THIS LINE
-# from urllib.parse import urlparse, parse_qs # <<< REMOVE THIS LINE
-import io # Keep this if you use it, but it's not directly related to the TypeError
-
 # Configure logging for Vercel environment
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -545,7 +540,7 @@ def register_handlers(app: Application) -> None:
     app.add_handler(ConversationHandler(
         entry_points=[CommandHandler("upload_file", start_upload_file)],
         states={
-            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.Photo, handle_uploaded_file)],
+            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.PHOTO, handle_uploaded_file)],
         },
         fallbacks=[CommandHandler("cancel", cancel_conversation)],
     ))
