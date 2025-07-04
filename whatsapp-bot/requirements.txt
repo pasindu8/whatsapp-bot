@@ -1,6 +1,6 @@
 python-telegram-bot==21.0.1
 requests==2.32.4
-yt-dlp # <<< මේ line එක මෙහෙම වෙනස් කරන්න. Version number එක අයින් කරන්න.
+yt-dlp
 firebase-admin==6.2.0
 google-generativeai==0.6.0
 gunicorn==22.0.0
