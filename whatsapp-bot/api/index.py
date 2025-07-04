@@ -19,12 +19,11 @@ from firebase_admin import credentials, firestore
 import google.generativeai as genai
 
 # Vercel specific imports for handling HTTP requests
-from http.server import BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
-import io
+# from http.server import BaseHTTPRequestHandler # <<< REMOVE THIS LINE
+# from urllib.parse import urlparse, parse_qs # <<< REMOVE THIS LINE
+import io # Keep this if you use it, but it's not directly related to the TypeError
 
 # Configure logging for Vercel environment
-# Vercel logs to stdout, so basicConfig is sufficient.
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -32,7 +31,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- Bot Configuration ---
-# Get these from Vercel Environment Variables (similar to Replit Secrets)
 BOT_TOKEN = os.environ.get('BOT_TOKEN') 
 SEND_MESSAGE_API_URL = os.environ.get('SEND_MESSAGE_API_URL', "https://typical-gracia-pdbot-aed22ab6.koyeb.app/send-message")
 
@@ -41,7 +39,6 @@ firebase_service_account_key_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY
 db = None
 if firebase_service_account_key_json:
     try:
-        # Check if Firebase app is already initialized to prevent re-initialization errors
         if not firebase_admin._apps:
             cred = credentials.Certificate(json.loads(firebase_service_account_key_json))
             firebase_admin.initialize_app(cred)
@@ -65,43 +62,36 @@ if gemini_api_key:
 else:
     logger.error("GEMINI_API_KEY not found in Vercel Environment Variables. Gemini AI will not be initialized.")
 
-# Firestore Collection Path (Public data for file metadata)
-# For Vercel, we don't have __app_id, so use a fixed ID.
 APP_ID = "telegram_vercel_bot_app"
 FILES_COLLECTION = db.collection(f"artifacts/{APP_ID}/public/data/files") if db else None
 
 # --- Conversation States ---
 SENDMSG_ASK_NUMBER, SENDMSG_ASK_MESSAGE = range(2)
 YT_ASK_URL = range(2, 3)
-UPLOAD_WAIT_FILE = range(3, 4) # Removed UPLOAD_GENERATE_PIN as it's part of handle_uploaded_file
+UPLOAD_WAIT_FILE = range(3, 4)
 GETFILE_ASK_PIN = range(4, 5)
 AI_ASK_QUERY = range(5, 6)
 DOWNLOAD_ASK_URL = range(6, 7)
 
 # --- Helper Functions ---
 def generate_pin(length=6):
-    """Generates a random alphanumeric PIN."""
     characters = string.ascii_uppercase + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
 async def is_pin_unique(pin: str) -> bool:
-    """Checks if a generated PIN is unique in Firestore."""
     if not FILES_COLLECTION:
         logger.error("Firestore not initialized, cannot check PIN uniqueness.")
         return False
-    
-    # Firestore operations are blocking, run in a separate thread
     query = FILES_COLLECTION.where('pin', '==', pin).limit(1)
     docs = await asyncio.to_thread(query.get)
     return len(docs) == 0
 
 async def generate_unique_pin(length=6) -> str:
-    """Generates a unique PIN."""
     while True:
         pin = generate_pin(length)
         if await is_pin_unique(pin):
             return pin
-        await asyncio.sleep(0.1) # Small delay to prevent busy-waiting
+        await asyncio.sleep(0.1)
 
 # --- Send Message API Function ---
 async def send_message_via_api(number: str, message_text: str) -> bool:
@@ -135,7 +125,6 @@ async def send_message_via_api(number: str, message_text: str) -> bool:
 
 # --- AI API Function ---
 async def ask_gemini_ai(query: str) -> str:
-    """Sends a query to the Gemini AI model and returns the response."""
     if not gemini_model:
         return "AI සේවාව ලබා ගත නොහැක. කරුණාකර පසුව උත්සාහ කරන්න."
     
@@ -149,7 +138,6 @@ async def ask_gemini_ai(query: str) -> str:
 
 # --- External URL Download Function ---
 async def download_file_from_url(url: str, chat_id: int, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Downloads a file from a given URL and sends it to the user."""
     await context.bot.send_message(chat_id=chat_id, text='File එක download කරමින් සිටී. කරුණාකර මොහොතක් රැඳී සිටින්න...')
     logger.info(f"Attempting to download file from URL: {url}")
 
@@ -356,7 +344,7 @@ async def start_upload_file(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 async def handle_uploaded_file(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if not FILES_COLLECTION:
-        await update.message.reply_text("File upload සේවාව ලබා ගත නොහැක. කරුණාකර පසුව උත්සාha කරන්න.")
+        await update.message.reply_text("File upload සේවාව ලබා ගත නොහැක. කරුණාකර පසුව උත්සාහ කරන්න.")
         return ConversationHandler.END
 
     file_obj = None
@@ -523,9 +511,6 @@ async def unhandled_message_handler(update: Update, context: ContextTypes.DEFAUL
         )
 
 # --- Global Application Instance ---
-# Initialize the Application instance globally
-# This is crucial for Vercel serverless functions, as the instance
-# needs to persist across requests (cold starts aside).
 application = Application.builder().token(BOT_TOKEN).build()
 
 # Register handlers once
@@ -560,7 +545,7 @@ def register_handlers(app: Application) -> None:
     app.add_handler(ConversationHandler(
         entry_points=[CommandHandler("upload_file", start_upload_file)],
         states={
-            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.PHOTO, handle_uploaded_file)],
+            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.Photo, handle_uploaded_file)],
         },
         fallbacks=[CommandHandler("cancel", cancel_conversation)],
     ))
