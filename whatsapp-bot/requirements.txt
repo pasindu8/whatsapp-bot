@@ -1,2 +1,8 @@
-flask
-requests
+python-telegram-bot==21.0.1
+requests==2.32.4
+yt-dlp==2024.07.03
+firebase-admin==6.2.0
+google-generativeai==0.6.0
+# For Vercel, we need a WSGI server for Python functions.
+# gunicorn is a common choice.
+gunicorn==22.0.0
