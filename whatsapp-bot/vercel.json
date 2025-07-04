@@ -5,7 +5,7 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "runtime": "python3.9" // Vercel's default is often 3.9, or you can try 3.10, 3.11, 3.12
+        "runtime": "python3.9"
       }
     }
   ],
