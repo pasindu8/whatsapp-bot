@@ -5,7 +5,7 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "runtime": "python3.9" // Or python3.10, python3.11, python3.12 - use a specific version
+        "runtime": "python3.9" // Vercel's default is often 3.9, or you can try 3.10, 3.11, 3.12
       }
     }
   ],
@@ -15,5 +15,5 @@
       "dest": "/api/index.py"
     }
   ],
-  "installCommand": "pip install -r requirements.txt && apt-get update && apt-get install -y ffmpeg" // <<< මේ line එක එකතු කරන්න
+  "installCommand": "pip install -r requirements.txt && apt-get update && apt-get install -y ffmpeg"
 }
