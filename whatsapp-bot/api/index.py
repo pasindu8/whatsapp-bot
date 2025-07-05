@@ -540,7 +540,8 @@ def register_handlers(app: Application) -> None:
     app.add_handler(ConversationHandler(
         entry_points=[CommandHandler("upload_file", start_upload_file)],
         states={
-            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.Photo, handle_uploaded_file)],
+            # Corrected filter: filters.PHOTO (uppercase)
+            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.PHOTO, handle_uploaded_file)],
         },
         fallbacks=[CommandHandler("cancel", cancel_conversation)],
     ))
