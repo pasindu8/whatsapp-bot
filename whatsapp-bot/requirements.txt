@@ -1,6 +1,5 @@
-python-telegram-bot==21.0.1
-requests==2.32.4
+python-telegram-bot==20.6
+firebase-admin
+google-generativeai
+requests
 yt-dlp
-firebase-admin==6.2.0
-google-generativeai==0.6.0
-gunicorn==22.0.0
