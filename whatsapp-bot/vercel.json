@@ -1,14 +1,19 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.py": {
-      "runtime": "vercel-python@0.7.1"
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.9" 
+      }
     }
-  },
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/index.py"
     }
-  ]
+  ],
+  "installCommand": "pip install -r requirements.txt && apt-get update && apt-get install -y ffmpeg"
 }
