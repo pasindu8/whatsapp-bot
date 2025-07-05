@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- Bot Configuration ---
-BOT_TOKEN = os.environ.get('BOT_TOKEN') 
+BOT_TOKEN = os.environ.get('BOT_TOKEN')  
 SEND_MESSAGE_API_URL = os.environ.get('SEND_MESSAGE_API_URL', "https://typical-gracia-pdbot-aed22ab6.koyeb.app/send-message")
 
 # --- Firebase Initialization ---
@@ -540,7 +540,7 @@ def register_handlers(app: Application) -> None:
     app.add_handler(ConversationHandler(
         entry_points=[CommandHandler("upload_file", start_upload_file)],
         states={
-            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.PHOTO, handle_uploaded_file)],
+            UPLOAD_WAIT_FILE: [MessageHandler(filters.Document.ALL | filters.VIDEO | filters.AUDIO | filters.Photo, handle_uploaded_file)],
         },
         fallbacks=[CommandHandler("cancel", cancel_conversation)],
     ))
